@@ -56,7 +56,7 @@ int main(int argc,char *argv[])
 {
     int listensock,connsock;
     struct addrinfo hints,*si;
-    const char buff[]="Hello! This is my first message to you!\n";
+    char buff[100];
     char recvbuf[100];
     int rv;
 
@@ -98,8 +98,40 @@ int main(int argc,char *argv[])
 
     connsock=accept(listensock,NULL,NULL);
     close(listensock);
+    /*
     if(send(connsock,buff,sizeof(buff),0)==-1){
         perror("send");
+    }
+    */
+    while(1){
+        memset(buff,'\0',sizeof(buff));
+        memset(recvbuf,'\0',sizeof(recvbuf));
+        //puts(buff);
+        puts("----Input 'exit' to quit");
+        puts("----Input your message to the client:");
+        scanf("%[^\n]",buff);
+        getchar();
+        //puts(buff);
+        if(strcmp(buff,"exit")==0){
+            const char quitbuff[]="Server left the chatroom";
+            if(send(connsock,quitbuff,sizeof(quitbuff),0)==-1){
+                perror("send");
+            }
+            break;
+        }
+        else{
+            if(send(connsock,buff,sizeof(buff),0)==-1){
+                perror("send");
+            }
+            
+            if(recv(connsock,recvbuf,sizeof(recvbuf),0)==-1){
+                perror("recv");
+            }
+            printf("Client says to you:\"%s\"\n",recvbuf);
+            if(strcmp(recvbuf,"Client left the chatroom")==0){
+                break;
+            }
+        }
     }
     close(connsock);
     return 0;

@@ -54,7 +54,7 @@ int main(int argc,char *argv[])
 */
 int main(int argc,char *argv[])
 {
-    char recvbuff[100];
+    char recvbuff[100],sendbuff[100];
     int sockfd;
     struct addrinfo hints,*si;
     int rv;
@@ -83,11 +83,40 @@ int main(int argc,char *argv[])
         exit(1);
     }
     freeaddrinfo(si);
-
+    /*
     if(recv(sockfd,recvbuff,sizeof(recvbuff),0)==-1){
         perror("recv");
     }
-    printf("%s\n",recvbuff);
+    */
+    while(1){
+
+        if(recv(sockfd,recvbuff,sizeof(recvbuff),0)==-1){
+                perror("recv");
+        }
+        if(strcmp(recvbuff,"Server left the chatroom")==0){
+                break;
+        }
+        printf("Server says to you :\"%s\"\n",recvbuff);
+        memset(sendbuff,'\0',sizeof(sendbuff));
+        memset(recvbuff,'\0',sizeof(recvbuff));
+        puts("----Input 'exit' to quit");
+        puts("----Input your message to the client:");
+        scanf("%[^\n]",sendbuff);
+        getchar();
+        if(strcmp(sendbuff,"exit")==0){
+            const char quitbuff[]="Client left the chatroom";
+            if(send(sockfd,quitbuff,sizeof(quitbuff),0)==-1){
+                perror("send");
+            }
+            break;
+        }
+        else{
+            if(send(sockfd,sendbuff,sizeof(sendbuff),0)==-1){
+                perror("send");
+            }
+        }
+    }
+    //printf("%s\n",recvbuff);
     close(sockfd);
     return 0;
 }
